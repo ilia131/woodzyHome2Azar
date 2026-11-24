@@ -1,0 +1,38 @@
+/* Brand fallback values from the brief and provisional presentation tokens.
+   These values are awaiting comparison with the original Figma styles. */
+:root {
+  --background: #faf9f6;
+  --surface: #fff;
+  --primary: #8b6346;
+  --primary-dark: #49382d;
+  --light-wood: #d8c2a5;
+  --text: #292720;
+  --muted: #6e6a60;
+  --border: #eae6df;
+  --success: #36865b;
+  --danger: #a33939;
+  --sand: #f0eae1;
+  --image-scrim: #21140fbf;
+  --on-dark: #fff9f1;
+  --footer-muted: #ddcec0;
+  --image-placeholder: #e9dfd1;
+  --font: "Vazirmatn Variable", Tahoma, sans-serif;
+  --font-display: Georgia, serif;
+  --radius: 18px;
+  --radius-small: 9px;
+  --radius-pill: 999px;
+  --shadow: 0 14px 38px #432f1610;
+  --focus: #81512c;
+  --gap: 24px;
+  /* Geometry confirmed at a 1280px design viewport. */
+  --content: 1184px;
+  --gutter: 48px;
+}
+
+/* Desktop geometry available from the official Figma metadata. */
+:root {
+  --reference-main-column: 57.48874%; /* 680.6667 of 1184 px */
+  --reference-category-image-column: 41.66667%; /* 493.3333 of 1184 px */
+  --reference-category-image-height: 352px;
+  --reference-favorites-nav-height: 63px; /* 65 px including borders */
+}

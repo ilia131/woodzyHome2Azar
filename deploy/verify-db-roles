@@ -1,0 +1,57 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/.."
+. ./.env
+runtime_psql() {
+    { printf '%s\n' "$AKSORIA_RUNTIME_PASSWORD"; cat; } |
+        docker compose exec -T db sh -ec '
+            IFS= read -r PGPASSWORD
+            export PGPASSWORD
+            exec psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U aksoria_runtime -d "$POSTGRES_DB"
+        '
+}
+runtime_psql <<'SQL'
+DO $$
+BEGIN
+    IF current_user <> 'aksoria_runtime'
+       OR EXISTS (SELECT 1 FROM pg_roles WHERE rolname = current_user AND (rolsuper OR rolcreatedb OR rolcreaterole))
+       OR EXISTS (SELECT 1 FROM pg_database WHERE datname = current_database() AND datdba = current_user::regrole)
+       OR EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'public' AND nspowner = current_user::regrole) THEN
+        RAISE EXCEPTION 'Unexpected runtime privileges or ownership';
+    END IF;
+END
+$$;
+BEGIN;
+INSERT INTO core_auditlog (action, model_label, object_id, metadata, created_at)
+VALUES ('permission_probe', 'probe', '1', '{}', now()) RETURNING id \gset
+SELECT id FROM core_auditlog WHERE id = :id;
+UPDATE core_auditlog SET action='permission_probe_updated' WHERE id = :id;
+DELETE FROM core_auditlog WHERE id = :id;
+ROLLBACK;
+SQL
+for statement in 'CREATE ROLE aksoria_permission_probe' 'CREATE DATABASE aksoria_permission_probe'     'ALTER SCHEMA public OWNER TO aksoria_runtime'; do
+    if output=$(printf '\\set VERBOSITY verbose\n%s;\n' "$statement" | runtime_psql 2>&1); then
+        printf 'Unexpectedly allowed: %s\n' "$statement" >&2
+        exit 1
+    fi
+    printf '%s\n' "$output" | grep -q '42501'
+    printf '42501 %s\n' "$statement"
+done
+
+for service in web worker beat; do
+    if ! docker compose ps --status running --services | grep -qx "$service"; then
+        printf '%s unavailable for connection verification\n' "$service" >&2
+        exit 1
+    fi
+    docker compose exec -T "$service" python - <<'PY'
+import os
+from config.wsgi import application
+from django.db import connection
+
+with connection.cursor() as cursor:
+    cursor.execute("SELECT current_user")
+    assert cursor.fetchone() == ('aksoria_runtime',)
+assert not {'AKSORIA_RUNTIME_PASSWORD', 'AKSORIA_MIGRATION_PASSWORD'}.intersection(os.environ)
+print('aksoria_runtime')
+PY
+done

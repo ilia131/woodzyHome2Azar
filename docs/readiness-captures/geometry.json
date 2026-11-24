@@ -1,0 +1,744 @@
+[
+  {
+    "name": "home",
+    "frame": "1:2226",
+    "route": "/",
+    "device": "desktop",
+    "width": 1280,
+    "height": 900,
+    "documentWidth": 1280,
+    "documentHeight": 6222,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 195
+    },
+    "footer": {
+      "x": 0,
+      "y": 5832.36,
+      "width": 1280,
+      "height": 390
+    },
+    "main": {
+      "x": 0,
+      "y": 195,
+      "width": 1280,
+      "height": 5637.36
+    },
+    "container": {
+      "x": 48,
+      "y": 195,
+      "width": 1184,
+      "height": 736
+    },
+    "headline": {
+      "x": 605.39,
+      "y": 354.81,
+      "width": 626.61,
+      "height": 216.81
+    },
+    "sidebar": null,
+    "primaryImage": {
+      "x": 48,
+      "y": 244.63,
+      "width": 479.34,
+      "height": 606.75
+    }
+  },
+  {
+    "name": "products",
+    "frame": "1:4233",
+    "route": "/products",
+    "device": "desktop",
+    "width": 1280,
+    "height": 900,
+    "documentWidth": 1280,
+    "documentHeight": 1912,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 195
+    },
+    "footer": {
+      "x": 0,
+      "y": 1522.19,
+      "width": 1280,
+      "height": 390
+    },
+    "main": {
+      "x": 0,
+      "y": 195,
+      "width": 1280,
+      "height": 1327.19
+    },
+    "container": {
+      "x": 48,
+      "y": 195,
+      "width": 1184,
+      "height": 1327.19
+    },
+    "headline": {
+      "x": 793.86,
+      "y": 308.61,
+      "width": 386.95,
+      "height": 77.44
+    },
+    "sidebar": {
+      "x": 912,
+      "y": 588.92,
+      "width": 320,
+      "height": 463.31
+    },
+    "primaryImage": null
+  },
+  {
+    "name": "product",
+    "frame": "1:1635",
+    "route": "/products/arta-sofa",
+    "device": "desktop",
+    "width": 1280,
+    "height": 900,
+    "documentWidth": 1280,
+    "documentHeight": 2019,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 195
+    },
+    "footer": {
+      "x": 0,
+      "y": 1629.28,
+      "width": 1280,
+      "height": 390
+    },
+    "main": {
+      "x": 0,
+      "y": 195,
+      "width": 1280,
+      "height": 1434.28
+    },
+    "container": {
+      "x": 48,
+      "y": 195,
+      "width": 1184,
+      "height": 1434.28
+    },
+    "headline": {
+      "x": 89,
+      "y": 331.11,
+      "width": 397.34,
+      "height": 77.44
+    },
+    "sidebar": null,
+    "primaryImage": {
+      "x": 551.34,
+      "y": 254.92,
+      "width": 680.66,
+      "height": 544.52
+    }
+  },
+  {
+    "name": "categories",
+    "frame": "1:611",
+    "route": "/categories",
+    "device": "desktop",
+    "width": 1280,
+    "height": 900,
+    "documentWidth": 1280,
+    "documentHeight": 2596,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 195
+    },
+    "footer": {
+      "x": 0,
+      "y": 2206,
+      "width": 1280,
+      "height": 390
+    },
+    "main": {
+      "x": 0,
+      "y": 195,
+      "width": 1280,
+      "height": 2011
+    },
+    "container": {
+      "x": 48,
+      "y": 195,
+      "width": 1184,
+      "height": 2011
+    },
+    "headline": {
+      "x": 48,
+      "y": 254.92,
+      "width": 1184,
+      "height": 77.44
+    },
+    "sidebar": null,
+    "primaryImage": null
+  },
+  {
+    "name": "living",
+    "frame": "1:3573",
+    "route": "/categories/living",
+    "device": "desktop",
+    "width": 1280,
+    "height": 900,
+    "documentWidth": 1280,
+    "documentHeight": 1984,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 195
+    },
+    "footer": {
+      "x": 0,
+      "y": 1594.08,
+      "width": 1280,
+      "height": 390
+    },
+    "main": {
+      "x": 0,
+      "y": 195,
+      "width": 1280,
+      "height": 1399.08
+    },
+    "container": {
+      "x": 48,
+      "y": 195,
+      "width": 1184,
+      "height": 1399.08
+    },
+    "headline": {
+      "x": 613.33,
+      "y": 345.64,
+      "width": 570.67,
+      "height": 77.44
+    },
+    "sidebar": {
+      "x": 954,
+      "y": 718.92,
+      "width": 278,
+      "height": 381.39
+    },
+    "primaryImage": {
+      "x": 48,
+      "y": 254.92,
+      "width": 493.33,
+      "height": 352
+    }
+  },
+  {
+    "name": "search",
+    "frame": "1:2",
+    "route": "/search?q=مبل",
+    "device": "desktop",
+    "width": 1280,
+    "height": 900,
+    "documentWidth": 1280,
+    "documentHeight": 1742,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 195
+    },
+    "footer": {
+      "x": 0,
+      "y": 1351.61,
+      "width": 1280,
+      "height": 390
+    },
+    "main": {
+      "x": 0,
+      "y": 195,
+      "width": 1280,
+      "height": 1156.61
+    },
+    "container": {
+      "x": 48,
+      "y": 195,
+      "width": 1184,
+      "height": 1156.61
+    },
+    "headline": {
+      "x": 782.48,
+      "y": 306.11,
+      "width": 398.33,
+      "height": 77.44
+    },
+    "sidebar": {
+      "x": 954,
+      "y": 653.11,
+      "width": 278,
+      "height": 463.31
+    },
+    "primaryImage": null
+  },
+  {
+    "name": "favorites",
+    "frame": "1:3011",
+    "route": "/favorites",
+    "device": "desktop",
+    "width": 1280,
+    "height": 900,
+    "documentWidth": 1280,
+    "documentHeight": 1712,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 183
+    },
+    "footer": {
+      "x": 0,
+      "y": 1321.77,
+      "width": 1280,
+      "height": 390
+    },
+    "main": {
+      "x": 0,
+      "y": 183,
+      "width": 1280,
+      "height": 1138.77
+    },
+    "container": {
+      "x": 48,
+      "y": 183,
+      "width": 1184,
+      "height": 1138.77
+    },
+    "headline": {
+      "x": 701.42,
+      "y": 296.61,
+      "width": 479.39,
+      "height": 77.44
+    },
+    "sidebar": {
+      "x": 954,
+      "y": 488.92,
+      "width": 278,
+      "height": 168.78
+    },
+    "primaryImage": null
+  },
+  {
+    "name": "about",
+    "frame": "1:1103",
+    "route": "/about",
+    "device": "desktop",
+    "width": 1280,
+    "height": 900,
+    "documentWidth": 1280,
+    "documentHeight": 2463,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 195
+    },
+    "footer": {
+      "x": 0,
+      "y": 2072.95,
+      "width": 1280,
+      "height": 390
+    },
+    "main": {
+      "x": 0,
+      "y": 195,
+      "width": 1280,
+      "height": 1877.95
+    },
+    "container": {
+      "x": 48,
+      "y": 195,
+      "width": 1184,
+      "height": 1877.95
+    },
+    "headline": {
+      "x": 48,
+      "y": 297.61,
+      "width": 1184,
+      "height": 77.44
+    },
+    "sidebar": null,
+    "primaryImage": null
+  },
+  {
+    "name": "home",
+    "frame": "1:2226",
+    "route": "/",
+    "device": "mobile",
+    "width": 390,
+    "height": 844,
+    "documentWidth": 390,
+    "documentHeight": 5967,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 209.19
+    },
+    "footer": {
+      "x": 0,
+      "y": 5519.17,
+      "width": 390,
+      "height": 448.16
+    },
+    "main": {
+      "x": 0,
+      "y": 209.19,
+      "width": 390,
+      "height": 5309.98
+    },
+    "container": {
+      "x": 15,
+      "y": 209.19,
+      "width": 360,
+      "height": 821.55
+    },
+    "headline": {
+      "x": 26.69,
+      "y": 307.2,
+      "width": 348.31,
+      "height": 116.16
+    },
+    "sidebar": null,
+    "primaryImage": {
+      "x": 15,
+      "y": 722.73,
+      "width": 360,
+      "height": 270
+    }
+  },
+  {
+    "name": "products",
+    "frame": "1:4233",
+    "route": "/products",
+    "device": "mobile",
+    "width": 390,
+    "height": 844,
+    "documentWidth": 390,
+    "documentHeight": 2582,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 209.19
+    },
+    "footer": {
+      "x": 0,
+      "y": 2134.11,
+      "width": 390,
+      "height": 448.16
+    },
+    "main": {
+      "x": 0,
+      "y": 209.19,
+      "width": 390,
+      "height": 1924.92
+    },
+    "container": {
+      "x": 15,
+      "y": 209.19,
+      "width": 360,
+      "height": 1924.92
+    },
+    "headline": {
+      "x": 35,
+      "y": 326.63,
+      "width": 320,
+      "height": 42.59
+    },
+    "sidebar": {
+      "x": 15,
+      "y": 589.11,
+      "width": 360,
+      "height": 463.31
+    },
+    "primaryImage": null
+  },
+  {
+    "name": "product",
+    "frame": "1:1635",
+    "route": "/products/arta-sofa",
+    "device": "mobile",
+    "width": 390,
+    "height": 844,
+    "documentWidth": 390,
+    "documentHeight": 2459,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 209.19
+    },
+    "footer": {
+      "x": 0,
+      "y": 2010.78,
+      "width": 390,
+      "height": 448.16
+    },
+    "main": {
+      "x": 0,
+      "y": 209.19,
+      "width": 390,
+      "height": 1801.59
+    },
+    "container": {
+      "x": 15,
+      "y": 209.19,
+      "width": 360,
+      "height": 1801.59
+    },
+    "headline": {
+      "x": 32,
+      "y": 619.3,
+      "width": 326,
+      "height": 42.59
+    },
+    "sidebar": null,
+    "primaryImage": {
+      "x": 15,
+      "y": 269.11,
+      "width": 360,
+      "height": 288
+    }
+  },
+  {
+    "name": "categories",
+    "frame": "1:611",
+    "route": "/categories",
+    "device": "mobile",
+    "width": 390,
+    "height": 844,
+    "documentWidth": 390,
+    "documentHeight": 2217,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 209.19
+    },
+    "footer": {
+      "x": 0,
+      "y": 1768.47,
+      "width": 390,
+      "height": 448.16
+    },
+    "main": {
+      "x": 0,
+      "y": 209.19,
+      "width": 390,
+      "height": 1559.28
+    },
+    "container": {
+      "x": 15,
+      "y": 209.19,
+      "width": 360,
+      "height": 1559.28
+    },
+    "headline": {
+      "x": 15,
+      "y": 269.11,
+      "width": 360,
+      "height": 42.59
+    },
+    "sidebar": null,
+    "primaryImage": null
+  },
+  {
+    "name": "living",
+    "frame": "1:3573",
+    "route": "/categories/living",
+    "device": "mobile",
+    "width": 390,
+    "height": 844,
+    "documentWidth": 390,
+    "documentHeight": 2613,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 209.19
+    },
+    "footer": {
+      "x": 0,
+      "y": 2165.03,
+      "width": 390,
+      "height": 448.16
+    },
+    "main": {
+      "x": 0,
+      "y": 209.19,
+      "width": 390,
+      "height": 1955.84
+    },
+    "container": {
+      "x": 15,
+      "y": 209.19,
+      "width": 360,
+      "height": 1955.84
+    },
+    "headline": {
+      "x": 35,
+      "y": 289.11,
+      "width": 320,
+      "height": 42.59
+    },
+    "sidebar": {
+      "x": 15,
+      "y": 785.06,
+      "width": 360,
+      "height": 381.39
+    },
+    "primaryImage": {
+      "x": 15,
+      "y": 454.81,
+      "width": 360,
+      "height": 232.25
+    }
+  },
+  {
+    "name": "search",
+    "frame": "1:2",
+    "route": "/search?q=مبل",
+    "device": "mobile",
+    "width": 390,
+    "height": 844,
+    "documentWidth": 390,
+    "documentHeight": 2455,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 209.19
+    },
+    "footer": {
+      "x": 0,
+      "y": 2007.17,
+      "width": 390,
+      "height": 448.16
+    },
+    "main": {
+      "x": 0,
+      "y": 209.19,
+      "width": 390,
+      "height": 1797.98
+    },
+    "container": {
+      "x": 15,
+      "y": 209.19,
+      "width": 360,
+      "height": 1797.98
+    },
+    "headline": {
+      "x": 35,
+      "y": 318.63,
+      "width": 320,
+      "height": 42.59
+    },
+    "sidebar": {
+      "x": 15,
+      "y": 651.3,
+      "width": 360,
+      "height": 463.31
+    },
+    "primaryImage": null
+  },
+  {
+    "name": "favorites",
+    "frame": "1:3011",
+    "route": "/favorites",
+    "device": "mobile",
+    "width": 390,
+    "height": 844,
+    "documentWidth": 390,
+    "documentHeight": 2108,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 209.19
+    },
+    "footer": {
+      "x": 0,
+      "y": 1659.52,
+      "width": 390,
+      "height": 448.16
+    },
+    "main": {
+      "x": 0,
+      "y": 209.19,
+      "width": 390,
+      "height": 1450.33
+    },
+    "container": {
+      "x": 15,
+      "y": 209.19,
+      "width": 360,
+      "height": 1450.33
+    },
+    "headline": {
+      "x": 103,
+      "y": 305.33,
+      "width": 252,
+      "height": 85.19
+    },
+    "sidebar": {
+      "x": 15,
+      "y": 515.11,
+      "width": 360,
+      "height": 168.78
+    },
+    "primaryImage": null
+  },
+  {
+    "name": "about",
+    "frame": "1:1103",
+    "route": "/about",
+    "device": "mobile",
+    "width": 390,
+    "height": 844,
+    "documentWidth": 390,
+    "documentHeight": 2774,
+    "header": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 209.19
+    },
+    "footer": {
+      "x": 0,
+      "y": 2325.92,
+      "width": 390,
+      "height": 448.16
+    },
+    "main": {
+      "x": 0,
+      "y": 209.19,
+      "width": 390,
+      "height": 2116.73
+    },
+    "container": {
+      "x": 15,
+      "y": 209.19,
+      "width": 360,
+      "height": 2116.73
+    },
+    "headline": {
+      "x": 15,
+      "y": 329.22,
+      "width": 360,
+      "height": 42.59
+    },
+    "sidebar": null,
+    "primaryImage": null
+  }
+]

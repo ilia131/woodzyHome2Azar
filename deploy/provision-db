@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")/.."
+. ./.env
+: "${AKSORIA_RUNTIME_PASSWORD:?Missing runtime password}"
+: "${AKSORIA_MIGRATION_PASSWORD:?Missing migration password}"
+if [ "$AKSORIA_RUNTIME_PASSWORD" = "$AKSORIA_MIGRATION_PASSWORD" ] ||
+   [ "$AKSORIA_RUNTIME_PASSWORD" = "$POSTGRES_PASSWORD" ] ||
+   [ "$AKSORIA_MIGRATION_PASSWORD" = "$POSTGRES_PASSWORD" ]; then
+    echo "Use distinct database passwords." >&2
+    exit 1
+fi
+# Supply credentials over stdin so they are not arguments or container configuration.
+{
+    printf '%s\n' "$AKSORIA_RUNTIME_PASSWORD" "$AKSORIA_MIGRATION_PASSWORD"
+    cat deploy/provision-db.sql
+} | docker compose exec -T -u postgres db sh -ec '
+    IFS= read -r AKSORIA_RUNTIME_PASSWORD
+    IFS= read -r AKSORIA_MIGRATION_PASSWORD
+    export AKSORIA_RUNTIME_PASSWORD AKSORIA_MIGRATION_PASSWORD
+    exec psql -X -q -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+'

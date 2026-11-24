@@ -1,0 +1,31 @@
+#!/bin/sh
+set -eu
+cd "$(dirname "$0")"
+umask 077
+temp=$(mktemp .env.XXXXXX)
+trap 'rm -f "$temp"' EXIT
+if [ -f .env ]; then
+    cp .env "$temp"
+else
+    cp .env.example "$temp"
+fi
+for key in DJANGO_SECRET_KEY POSTGRES_PASSWORD AKSORIA_RUNTIME_PASSWORD AKSORIA_MIGRATION_PASSWORD; do
+    if ! grep -q "^${key}=.\+" "$temp"; then
+        if [ -f .env ] && [ "$key" = POSTGRES_PASSWORD ]; then
+            echo "Keep the original POSTGRES_PASSWORD for the existing database." >&2
+            exit 1
+        fi
+        value=$(openssl rand -hex 48)
+        sed -i "/^${key}=$/d" "$temp"
+        printf '\n%s=%s\n' "$key" "$value" >> "$temp"
+    fi
+done
+if [ ! -f .env ] || ! cmp -s "$temp" .env; then
+    mv "$temp" .env
+fi
+docker compose build web
+docker compose up --wait db redis
+docker compose stop web worker beat
+./deploy/provision-db
+docker compose run --rm --no-deps init
+docker compose up --no-build --detach
