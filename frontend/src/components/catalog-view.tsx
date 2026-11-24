@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { categories, categoryChildren, first, number, popularSearches, products, queryParams, suggestedCategories } from "@/lib/catalog";
+import { categories, categoryChildren, first, number, popularSearches, products, queryParams, recentSearches, suggestedCategories } from "@/lib/catalog";
 import type { Category, Query } from "@/lib/types";
 import { Crumbs, Heading, Picture, ProductGrid } from "./storefront";
 
@@ -8,7 +8,7 @@ const sorts = [["", "پیش‌فرض"], ["-newest", "تازه‌ترین"], ["pr
 
 export async function CatalogView({ path, query, selected, search = false }: { path: string; query: Query; selected?: Category; search?: boolean }) {
   const selectedQuery = selected ? { ...query, category: selected.slug } : query;
-  const [groups, list, children, suggestions, terms] = await Promise.all([categories(), products(selectedQuery, search), selected ? categoryChildren(selected.slug) : [], search ? suggestedCategories() : [], search ? popularSearches() : []]);
+  const [groups, list, children, suggestions, terms, recent] = await Promise.all([categories(), products(selectedQuery, search), selected ? categoryChildren(selected.slug) : [], search ? suggestedCategories() : [], search ? popularSearches() : [], search ? recentSearches() : []]);
   const phrase = first(query.q);
   const title = search ? "نتایج جست‌وجو" : selected?.name ?? "همه محصولات";
   const params = queryParams(selectedQuery);
@@ -45,6 +45,7 @@ export async function CatalogView({ path, query, selected, search = false }: { p
         </div>
       </div>
     </div>
+    {search && recent.length > 0 && <section className="search-related"><Heading title="جست‌وجوهای اخیر شما"/><div className="chips">{recent.map(({ term }) => <Link key={term} href={"/search?q=" + encodeURIComponent(term)}>{term}</Link>)}</div></section>}
     {search && terms.length > 0 && <section className="search-related"><Heading title="جست‌وجوهای محبوب"/><div className="chips">{terms.map(({ term }) => <Link key={term} href={"/search?q=" + encodeURIComponent(term)}>{term}</Link>)}</div></section>}
     {search && suggestions.length > 0 && <section className="search-related"><Heading title="دسته‌های مرتبط"/><div className="chips">{suggestions.map(c => <Link key={c.id} href={"/categories/" + encodeURIComponent(c.slug)}>{c.name}</Link>)}</div></section>}
   </div>;

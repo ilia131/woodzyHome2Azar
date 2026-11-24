@@ -78,8 +78,24 @@ test("favorite is added then removed", async () => {
   const page = await browser.newPage({ storageState: staffState });
   try {
     await page.goto(base + product);
-    await page.locator(".product-detail").getByRole("button", { name: "افزودن به علاقه‌مندی‌ها" }).click();
+    const detail = page.locator(".product-detail");
+    const toggle = detail.getByRole("button", { name: /علاقه‌مندی‌ها/ });
+    await toggle.waitFor();
+    if (await toggle.getAttribute("aria-pressed") === "true") {
+      await toggle.click();
+    }
+    await detail.getByRole("button", { name: "افزودن به علاقه‌مندی‌ها" }).click();
     await page.waitForLoadState("networkidle");
+    if (live) {
+      await page.goto(base + "/account/dashboard");
+      const saved = page.getByRole("heading", { name: "علاقه‌مندی‌های اخیر" }).locator("..");
+      await saved.getByRole("link", { name: "مشاهده محصول" }).waitFor();
+      await page.goto(base + "/search?q=" + encodeURIComponent("مبل"));
+      await page.getByRole("heading", { name: "نتایج جست‌وجو" }).waitFor();
+      await page.goto(base + "/search");
+      const recent = page.getByRole("heading", { name: "جست‌وجوهای اخیر شما" }).locator("xpath=ancestor::section[1]");
+      await recent.getByRole("link", { name: "مبل", exact: true }).waitFor();
+    }
     await page.goto(base + "/favorites");
     await page.getByRole("button", { name: "حذف از علاقه‌مندی‌ها" }).click();
     await page.getByText("هنوز محصولی به علاقه‌مندی‌ها اضافه نشده است.").waitFor();

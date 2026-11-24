@@ -46,6 +46,17 @@ export async function favoriteIds(ids: number[]) {
   return new Set(result.ids);
 }
 
+export async function recentSearches() {
+  if (demo) return [];
+  const access = (await cookies()).get("woodzy-access")?.value;
+  if (!access) return [];
+  const response = await api("search/recent/?page_size=8", { headers: { Authorization: "Bearer " + access } });
+  if (response.status === 401) return [];
+  if (!response.ok) throw new Error("دریافت جست‌وجوهای اخیر امکان‌پذیر نبود.");
+  const result: Listing<{ term: string }> = await response.json();
+  return result.results;
+}
+
 export async function popularSearches() {
   if (demo) return [];
   return (await data<Listing<{ term: string; count: number }>>("search/popular/?page_size=8", true))?.results ?? [];

@@ -45,6 +45,7 @@ export async function Dashboard() {
     <Panel title="پرداخت‌های اخیر"><ApiTable endpoint="payments/?page_size=5" columns={paymentColumns}/></Panel>
     <Panel title="آدرس‌ها"><ApiTable endpoint="addresses/?page_size=5" columns={[["city","شهر"],["address_line","نشانی"],["is_default","پیش‌فرض"]]}/></Panel>
     <Panel title="جست‌وجوهای اخیر"><ApiTable endpoint="dashboard/searches/" columns={[["term","عبارت"]]}/></Panel>
+    <Panel title="علاقه‌مندی‌های اخیر"><ApiTable endpoint="dashboard/favorites/?page_size=5" columns={[["title","محصول"]]} actions={row => <Link href={"/products/" + encodeURIComponent(String(row.slug))}>مشاهده محصول</Link>}/></Panel>
     <Panel title="بازدیدهای اخیر"><ApiTable endpoint="dashboard/views/" columns={[["product.title","محصول"],["viewed_at","زمان"]]}/></Panel>
   </>;
 }
