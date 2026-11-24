@@ -2,7 +2,7 @@ import { addToCart } from "@/app/actions";
 import { notFound } from "next/navigation";
 import { Gallery } from "@/components/interactive";
 import { Crumbs, FavoriteButton, Heading, ProductGrid } from "@/components/storefront";
-import { category, collection, first, number, product, reviews, toman } from "@/lib/catalog";
+import { category, collection, favoriteIds, first, number, product, reviews, toman } from "@/lib/catalog";
 import type { Query } from "@/lib/types";
 import Link from "next/link";
 
@@ -24,9 +24,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const tab = first(query.tab);
   const cartStatus = first(query.cart);
   const active = tabs.some(t => t[0] === tab) ? tab : "details";
-  const [group, related, comments] = await Promise.all([
+  const [group, related, similar, comments, favorites] = await Promise.all([
     category(item.category), collection("products/" + encodeURIComponent(slug) + "/related/", slug),
+    collection("products/" + encodeURIComponent(slug) + "/similar/", slug),
     active === "reviews" ? reviews(item.id) : Promise.resolve([]),
+    favoriteIds([item.id]),
   ]);
   const gallery = item.main_image && !item.gallery.some(i => i.image === item.main_image)
     ? [{ id: 0, image: item.main_image, position: 0, alt_text: item.title }, ...item.gallery] : item.gallery;
@@ -42,17 +44,18 @@ export default async function ProductPage({ params, searchParams }: Props) {
           <form action={addToCart}><input type="hidden" name="slug" value={item.slug}/><label>تعداد <input name="quantity" type="number" min="1" max="99" defaultValue="1" required/></label><button className="button" disabled={!item.in_stock}>افزودن به سبد خرید</button></form>
           {cartStatus && <p role="status">{cartStatus === "saved" ? "محصول در سبد خرید ثبت شد." : cartStatus === "demo" ? "سبد خرید پس از اتصال به فروشگاه فعال می‌شود." : "ثبت در سبد خرید ممکن نبود. موجودی و تعداد را بررسی کنید."}</p>}
         </div>
-        <div className="product-favorite"><FavoriteButton id={item.id}/><span>افزودن به علاقه‌مندی‌ها</span></div>
+        <div className="product-favorite"><FavoriteButton id={item.id} remove={favorites.has(item.id)}/><span>{favorites.has(item.id) ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}</span></div>
         <dl><dt>شناسه محصول</dt><dd dir="ltr">{item.sku}</dd></dl>
       </div>
     </section>
     <section className="detail-tabs" id="product-details"><nav aria-label="اطلاعات محصول">{tabs.map(([id, label]) => <Link key={id} href={"?tab=" + id + "#product-details"} aria-current={active === id ? "page" : undefined}>{label}</Link>)}</nav>
       {active === "details" && <p>{item.description || item.short_description}</p>}
-      {active === "reviews" && (comments.length ? <ul>{comments.map(review => <li key={review.id}><strong>{review.title}</strong><p>{review.comment}</p></li>)}</ul> : <p>هنوز دیدگاه تأییدشده‌ای ثبت نشده است.</p>)}
+      {active === "reviews" && (comments.length ? <ul>{comments.map(review => <li key={review.id}><strong>{review.title}</strong><p>{review.comment}</p><p>{number.format(review.rating)} از ۵</p>{review.replies.map(reply => <blockquote key={reply.id}><strong>پاسخ فروشگاه</strong><p>{reply.comment}</p></blockquote>)}</li>)}</ul> : <p>هنوز دیدگاه تأییدشده‌ای ثبت نشده است.</p>)}
       {active === "reviews" && <Link className="inline-link" href={"/account/activity?product=" + item.id}>ثبت دیدگاه</Link>}
       {["care", "guarantee"].includes(active) && <p>برای دریافت جزئیات این بخش، <Link className="inline-link" href="/about#contact">با فروشگاه تماس بگیرید.</Link></p>}
     </section>
     <section className="related"><Heading title="محصولات مکمل و مرتبط"/><ProductGrid items={related}/></section>
+    {similar.length > 0 && <section className="related"><Heading title="محصولات مشابه"/><ProductGrid items={similar}/></section>}
     {item.seo?.structured_data && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(item.seo.structured_data).replace(/</g, "\\u003c") }}/>}
   </div>;
 }

@@ -2,13 +2,15 @@ import Link from "next/link";
 import { Heart } from "lucide-react";
 import { signIn, signOut } from "@/app/actions";
 import { Crumbs, Heading, LinkButton, ProductCard, ProductGrid } from "@/components/storefront";
-import { collection, demo, favoriteProducts, first, number } from "@/lib/catalog";
+import { collection, demo, favoriteProducts, first, number, recommendationsFromFavorites } from "@/lib/catalog";
 import type { Query } from "@/lib/types";
 export const metadata = { title: "علاقه‌مندی‌ها", robots: { index: false } };
 export default async function FavoritesPage({ searchParams }: { searchParams: Promise<Query> }) {
   const query = await searchParams;
   const page = Math.max(1, parseInt(first(query.page), 10) || 1);
-  const [{ items, authenticated }, suggested] = await Promise.all([favoriteProducts(page), collection("products/recommended/")]);
+  const { items, authenticated } = await favoriteProducts(page);
+  const fromFavorites = authenticated && items.count ? await recommendationsFromFavorites() : [];
+  const suggested = fromFavorites.length ? fromFavorites : await collection("products/recommended/");
   const error = first(query.login);
   return <div className="container favorites-page">
     <Crumbs trail={[["علاقه‌مندی‌ها"]]}/>

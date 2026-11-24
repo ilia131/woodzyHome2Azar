@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { RecoveryForms, StoreFeedback } from "@/components/store-forms";
-import { signIn, signOut } from "@/app/actions";
+import { renewSession, signIn, signOut } from "@/app/actions";
 import { register } from "@/app/account-actions";
 import { ApiTable, DataTable, FieldInput, MutationForm, Panel, ServiceIssue, value } from "@/components/workspace";
 import type { Field } from "./operations";
@@ -16,7 +16,10 @@ const credentials: Field[] = [
 ];
 export function AuthForms({ query }: { query: Query }) {
   return <>
-    <Panel title="ورود"><p>{query.login === "invalid" && "شماره موبایل یا گذرواژه معتبر نیست."}{query.login === "limited" && "تعداد درخواست‌های ورود زیاد است."}</p><form className="workspace-form" action={signIn}>
+    <Panel title="ورود"><form action={renewSession}><button className="chips-button">تمدید نشست</button></form>
+      {query.login === "expired" && <p role="status">نشست منقضی شده است. دوباره وارد شوید.</p>}
+      {query.login === "refresh-unavailable" && <p role="alert">تمدید نشست در دسترس نیست.</p>}
+      {query.login === "logout-unavailable" && <p role="alert">پایان نشست در سرور تأیید نشد. دوباره تلاش کنید.</p>}<p>{query.login === "invalid" && "شماره موبایل یا گذرواژه معتبر نیست."}{query.login === "limited" && "تعداد درخواست‌های ورود زیاد است."}</p><form className="workspace-form" action={signIn}>
       {credentials.map(field => <FieldInput key={field.name} field={field}/>)}<input name="destination" type="hidden" value="/account/dashboard"/><button className="button">ورود</button>
     </form><Link href="/account/recovery" className="inline-link">گذرواژه را فراموش کرده‌اید؟</Link></Panel>
     <Panel title="ثبت‌نام"><form className="workspace-form" action={register}>
@@ -33,11 +36,14 @@ export async function Recovery({ query }: { query: Query }) {
   ]}/> : <Link href="/account/auth" className="inline-link">ورود به حساب</Link>}</Panel>;
 }
 export async function Dashboard() {
-  const info: Row = await authorized("dashboard/overview/");
+  const [info, orders]: [Row, { count: number }] = await Promise.all([authorized("dashboard/overview/"), authorized("orders/?page_size=1")]);
   return <><Panel title={"خوش آمدید " + ((info.profile as Row).first_name || "")}>
     <div className="metric-grid">{[["favorite_count", "علاقه‌مندی"], ["reviews.count", "دیدگاه"], ["notifications.unread_count", "اعلان خوانده‌نشده"]].map(([key, label]) => <Link href={key === "favorite_count" ? "/favorites" : key === "reviews.count" ? "/account/activity" : "#notifications"} key={key}><strong>{value(info, key)}</strong>{label}</Link>)}</div>
     <form action={signOut}><button className="chips-button">خروج از حساب</button></form></Panel>
     <div id="notifications"><Panel title="اعلان‌ها"><ApiTable endpoint="dashboard/notifications/" columns={[["title","عنوان"],["body","پیام"],["is_read","دیده شده"]]}/></Panel></div>
+    <Panel title="سفارش‌های اخیر"><p>تعداد کل سفارش‌ها {number.format(orders.count)}</p><ApiTable endpoint="orders/?page_size=5" columns={orderColumns} actions={row => <Link href={"/account/orders?id=" + row.id}>جزئیات</Link>}/></Panel>
+    <Panel title="پرداخت‌های اخیر"><ApiTable endpoint="payments/?page_size=5" columns={paymentColumns}/></Panel>
+    <Panel title="آدرس‌ها"><ApiTable endpoint="addresses/?page_size=5" columns={[["city","شهر"],["address_line","نشانی"],["is_default","پیش‌فرض"]]}/></Panel>
     <Panel title="جست‌وجوهای اخیر"><ApiTable endpoint="dashboard/searches/" columns={[["term","عبارت"]]}/></Panel>
     <Panel title="بازدیدهای اخیر"><ApiTable endpoint="dashboard/views/" columns={[["product.title","محصول"],["viewed_at","زمان"]]}/></Panel>
   </>;

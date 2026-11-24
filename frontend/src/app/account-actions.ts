@@ -9,6 +9,10 @@ import { operations, type OperationKey } from "@/features/operations";
 const routes = /^\/(?:account\/(?:auth|recovery|dashboard|profile|orders|activity)|checkout\/(?:cart|details|payment|result)|admin\/(?:overview|products|editor|categories|inventory|orders|customers|payments|settings))(?:\?[^#]*)?$/;
 export async function mutate(op: OperationKey, id: string, returnTo: string, form: FormData) {
   if (!Object.hasOwn(operations, op) || !routes.test(returnTo) || (id && !/^\d{1,16}$/.test(id))) redirect("/");
+  if (process.env.WOODZY_TEST_PAYMENTS !== "1" &&
+    (op === "simulate" || (op === "payment" && form.get("provider") === "mock"))) {
+    redirect("/checkout/payment?feedback=unavailable");
+  }
   const operation: (typeof operations)[OperationKey] = operations[op];
   const integers = "integers" in operation ? operation.integers : [];
   const booleans = "booleans" in operation ? operation.booleans : [];

@@ -45,6 +45,7 @@ for (const route of paths) {
       assert.equal(response?.status(), 200);
       assert.equal(await page.locator("html").getAttribute("lang"), "fa");
       assert.equal(await page.locator("html").getAttribute("dir"), "rtl");
+      await page.locator("main h1").waitFor();
       assert.equal(await page.locator("main h1").count(), 1);
       assert.ok(!(await page.locator("main").textContent()).includes("دریافت اطلاعات ممکن نبود"));
       for (const [width, height] of [[1440, 900], [1280, 900], [1024, 768], [768, 1024], [390, 844], [375, 812], [320, 812]]) {
@@ -92,6 +93,9 @@ test("isolated Django checkout and verified mock payment", { skip: !live }, asyn
     await page.getByRole("button", { name: "افزودن به سبد خرید" }).click();
     await page.getByRole("status").filter({ hasText: "محصول در سبد خرید ثبت شد" }).waitFor();
     await page.goto(base + "/checkout/cart");
+    await page.getByLabel("تعداد", { exact: true }).fill("2");
+    await page.getByRole("button", { name: "به‌روزرسانی" }).click();
+    await page.getByRole("status").filter({ hasText: "تغییرات ثبت شد" }).waitFor();
     await page.getByRole("link", { name: "ادامه خرید" }).click();
     await page.getByRole("button", { name: "ثبت سفارش", exact: true }).click();
     await page.waitForURL("**/checkout/payment?order=*");
@@ -223,5 +227,24 @@ test("Django contact form stores a message", { skip: !live }, async () => {
     await form.getByLabel("پیام", { exact: true }).fill("این پیام برای آزمایش ثبت فرم در محیط ایزوله است.");
     await form.getByRole("button", { name: "ارسال پیام" }).click();
     await page.getByRole("status").filter({ hasText: "در صندوق پیام فروشگاه ثبت شد" }).waitFor();
+  } finally { await page.close(); }
+});
+
+test("Django rotates the browser session and logout revokes its refresh token", { skip: !live }, async () => {
+  const page = await browser.newPage();
+  try {
+    await login(page);
+    const before = (await page.context().cookies()).find(cookie => cookie.name === "woodzy-refresh");
+    assert.ok(before?.httpOnly);
+    await page.goto(base + "/account/auth");
+    await page.getByRole("button", { name: "تمدید نشست" }).click();
+    await page.waitForURL("**/account/dashboard");
+    const after = (await page.context().cookies()).find(cookie => cookie.name === "woodzy-refresh");
+    assert.ok(after?.httpOnly && after.value !== before.value);
+    await page.getByRole("button", { name: "خروج از حساب" }).click();
+    await page.waitForURL("**/account/auth");
+    assert.ok(!(await page.context().cookies()).some(cookie => cookie.name === "woodzy-refresh"));
+    await page.goto(base + "/account/dashboard");
+    await page.getByRole("link", { name: "وارد شوید" }).waitFor();
   } finally { await page.close(); }
 });

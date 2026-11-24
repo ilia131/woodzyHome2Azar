@@ -1,10 +1,12 @@
 from django.conf import settings
+from django.db.models import OuterRef, Subquery, Sum
 from django_filters import rest_framework as filters
 from rest_framework import generics
 from rest_framework.response import Response
 
 from analytics.services import COOKIE_AGE, GUEST_COOKIE, record_view
 from categories.selectors import public_categories, visible_category_ids
+from orders.models import Order, OrderItem
 from recommendations.ranking import catalog_score
 from .selectors import public_products
 from .serializers import ProductDetailSerializer, ProductSerializer
@@ -57,6 +59,14 @@ class MostViewed(ProductList):
 class MostFavorited(ProductList):
     def get_queryset(self):
         return public_products().order_by('-favorite_count', '-pk')
+
+
+class BestSellers(ProductList):
+    def get_queryset(self):
+        sold = (OrderItem.objects.filter(product_id=OuterRef('pk'), order__status=Order.Status.COMPLETED)
+                .order_by().values('product_id').annotate(total=Sum('quantity')).values('total'))
+        return (public_products().annotate(completed_quantity=Subquery(sold))
+                .filter(completed_quantity__gt=0).order_by('-completed_quantity', '-pk'))
 
 
 class BestDiscounts(ProductList):

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { renewSession } from "@/app/actions";
 import type { ReactNode } from "react";
 import { mutate } from "@/app/account-actions";
 import { Crumbs, LinkButton } from "./storefront";
@@ -33,7 +34,7 @@ export function Panel({ title, children }: { title: string; children: ReactNode 
   return <section className="workspace-panel"><h2>{title}</h2>{children}</section>;
 }
 export function ServiceIssue({ error }: { error: unknown }) {
-  if (error instanceof BackendError && error.status === 401) return <div className="empty">برای دسترسی به اطلاعات حساب <Link href="/account/auth" className="inline-link">وارد شوید</Link>.</div>;
+  if (error instanceof BackendError && error.status === 401) return <div className="empty">برای دسترسی به اطلاعات حساب <Link href="/account/auth" className="inline-link">وارد شوید</Link>.<form action={renewSession}><button className="chips-button">تمدید نشست</button></form></div>;
   if (error instanceof BackendError && error.status === 403) return <p className="empty">حساب شما مجوز مشاهدهٔ این بخش را ندارد.</p>;
   if (error instanceof BackendError && error.status === 404) return <p className="empty">اطلاعات درخواستی پیدا نشد.</p>;
   return <p className="empty">اتصال به سرویس برقرار نشد. کمی بعد دوباره تلاش کنید.</p>;

@@ -9,4 +9,4 @@ export interface Product {
 }
 export interface Listing<T> { count: number; next: string | null; previous: string | null; results: T[] }
 export type Query = Record<string, string | string[] | undefined>;
-export interface Review { id: number; title: string; comment: string; rating: number }
+export interface Review { id: number; title: string; comment: string; rating: number; replies: { id: number; parent: number | null; comment: string; created_at: string }[] }

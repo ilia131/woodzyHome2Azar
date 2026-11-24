@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { api, demo, product } from "@/lib/catalog";
+import { clearSession, refreshSession, revokeSession, saveSession } from "@/lib/session";
 import { showcaseProducts } from "@/lib/showcase";
 
 const sessionOptions = { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production" && !demo, path: "/" };
@@ -28,7 +29,7 @@ export async function saveFavorite(form: FormData) {
     if ([401, 403].includes(response.status)) redirect("/favorites");
     if (!response.ok) throw new Error("به‌روزرسانی علاقه‌مندی ممکن نبود.");
   }
-  revalidatePath("/favorites");
+  revalidatePath("/", "layout");
 }
 
 export async function signIn(form: FormData) {
@@ -42,14 +43,18 @@ export async function signIn(form: FormData) {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone, password }),
   });
   if (!response.ok) redirect(loginPage + "?login=" + (response.status === 429 ? "limited" : "invalid"));
-  const { access } = await response.json();
-  if (typeof access === "string") (await cookies()).set("woodzy-access", access, sessionOptions);
+  if (!await saveSession(await response.json())) redirect(loginPage + "?login=invalid");
   redirect(destination);
 }
 
 export async function signOut() {
-  (await cookies()).delete("woodzy-access");
-  redirect("/favorites");
+  try {
+    await revokeSession();
+  } catch {
+    redirect("/account/auth?login=logout-unavailable");
+  }
+  await clearSession();
+  redirect("/account/auth");
 }
 
 export async function addToCart(form: FormData) {
@@ -68,4 +73,15 @@ export async function addToCart(form: FormData) {
   });
   if ([401, 403].includes(response.status)) redirect("/favorites");
   redirect(path + "?cart=" + (response.ok ? "saved" : "error"));
+}
+
+
+export async function renewSession() {
+  let renewed: boolean;
+  try {
+    renewed = await refreshSession();
+  } catch {
+    redirect("/account/auth?login=refresh-unavailable");
+  }
+  redirect(renewed ? "/account/dashboard" : "/account/auth?login=expired");
 }

@@ -44,11 +44,27 @@ async function ProductEditor({ query }: { query: Query }) {
   const options: [string,string][] = [["","انتخاب دسته"], ...groups.rows.map((c): [string,string] => [String(c.id),String(c.name)])];
   if (row?.category && !options.some(([value]) => value === String(row.category))) options.push([String(row.category), String(row.category)]);
   return <><Panel title={id ? "ویرایش محصول" : "ساخت محصول"}><MutationForm operation={id ? "editProduct" : "addProduct"} id={id} returnTo={route} label="ذخیره محصول" fields={productFields(options,row ?? undefined)}/></Panel>
-    {id && <Panel title="گالری محصول"><ApiTable endpoint={"admin/product-images/?product=" + id} columns={[["position","ترتیب"],["alt_text","متن جایگزین"]]} actions={r => <MutationForm operation="removeImage" id={identify(r)} returnTo={route} label="حذف تصویر"/>}/>
+    {id && <Panel title="گالری محصول"><ApiTable endpoint={"admin/product-images/?product=" + id} columns={[["position","ترتیب"],["alt_text","متن جایگزین"]]} actions={r => <details><summary>ویرایش تصویر</summary>
+      <MutationForm operation="editImage" id={identify(r)} returnTo={route} label="ذخیره مشخصات تصویر" fields={[
+        {name:"alt_text",label:"متن جایگزین",value:String(r.alt_text ?? "")},
+        {name:"position",label:"ترتیب",type:"number",min:0,value:Number(r.position),required:true},
+      ]}/>
+      <MutationForm operation="removeImage" id={identify(r)} returnTo={route} label="حذف تصویر"/>
+    </details>}/>
     <MutationForm operation="addImage" returnTo={route} label="افزودن تصویر" fields={[
       {name:"product",label:"",type:"hidden",value:id},{name:"image",label:"تصویر",type:"file",required:true},{name:"alt_text",label:"متن جایگزین"},{name:"position",label:"ترتیب",type:"number",min:0,value:0},
     ]}/></Panel>}
+    {id && <Panel title="تاریخچه محصول"><ApiTable endpoint={"admin/product-history/?product=" + id} columns={[["created_at","تاریخ"],["price","قیمت"],["discount_price","قیمت تخفیف"],["stock","موجودی"]]}/></Panel>}
+    {id && <ProductMetrics id={id}/>}
     {id && row && <ProductSeo productId={id} sku={String(row.sku)}/>}</>;
+}
+async function ProductMetrics({ id }: { id: string }) {
+  try {
+    const metrics = await authorized("admin/products/" + id + "/views/");
+    return <Panel title="آمار بازدید محصول"><DataTable rows={[metrics]} columns={[
+      ["total","کل"], ["authenticated","با حساب"], ["guest","مهمان"], ["unique","یکتا"], ["weekly","هفته"], ["monthly","ماه"],
+    ]}/></Panel>;
+  } catch (error) { return <Panel title="آمار بازدید محصول"><ServiceIssue error={error}/></Panel>; }
 }
 async function ProductSeo({ productId, sku }: { productId: string; sku: string }) {
   try {
@@ -125,6 +141,20 @@ async function Payments({ query }: { query: Query }) {
     <Panel title="تراکنش‌ها"><ApiTable endpoint={"admin/payments/transactions/" + (id ? "?payment=" + id : "")} columns={[["payment","پرداخت"],["transaction_type","نوع"],["status","وضعیت"],["provider_transaction_id","مرجع"]]}/></Panel>
     <Panel title="مغایرت‌ها"><ApiTable endpoint="admin/payments/reconciliation/" columns={paymentColumns}/></Panel></>;
 }
+async function RankingSettings() {
+  try {
+    const { rows } = await list("admin/ranking-weights/");
+    const weights = rows[0];
+    if (!weights) return <p className="empty">وزن‌های رتبه‌بندی هنوز تنظیم نشده‌اند.</p>;
+    const fields: [string, string][] = [
+      ["views","بازدید"], ["favorites","علاقه‌مندی"], ["discount","تخفیف"],
+      ["affordability","قیمت مناسب"], ["freshness","تازگی"], ["featured","ویژه"],
+    ];
+    return <MutationForm operation="rankingWeights" id={identify(weights)} returnTo="/admin/settings"
+      fields={fields.map(([name,label]) => ({name,label,value:String(weights[name] ?? "")}))} label="ذخیره وزن‌های رتبه‌بندی"/>;
+  } catch (error) { return <ServiceIssue error={error}/>; }
+}
+
 async function Settings({ query }: { query: Query }) {
   const policyFields = [["favorite_weight","وزن علاقه‌مندی"],["view_weight","وزن بازدید"],["category_weight","وزن دسته"],["title_weight","وزن عنوان"],["description_weight","وزن توضیح"],["history_days","روزهای تاریخچه"],["min_viewed_products","حداقل محصول دیده‌شده"],["seed_limit","حد پیشنهاد اولیه"]];
   let policy: Row | undefined;
@@ -134,6 +164,9 @@ async function Settings({ query }: { query: Query }) {
     <p>{String(r.comment ?? "")}</p><MutationForm operation="review" id={identify(r)} returnTo="/admin/settings" label={r.is_approved ? "رد دیدگاه" : "تأیید دیدگاه"} fields={[{name:"is_approved",label:"",type:"hidden",value:!r.is_approved}]}/>
     <MutationForm operation="reply" id={identify(r)} returnTo="/admin/settings" label="ارسال پاسخ" fields={[{name:"comment",label:"پاسخ",type:"textarea",required:true}]}/></details>}/></Panel>
     <Panel title="گزارش محصولات پربازدید"><ApiTable endpoint="admin/reports/most-viewed-products/" columns={[["title","محصول"],["view_count","بازدید"]]}/></Panel>
+    <Panel title="محبوب‌ترین محصولات"><ApiTable endpoint="admin/reports/popular-products/" columns={[["title","محصول"],["favorite_count","علاقه‌مندی‌ها"],["view_count","بازدید"]]}/></Panel>
+    <Panel title="دسته‌های محبوب"><ApiTable endpoint="admin/reports/popular-categories/" columns={[["name","دسته"],["description","توضیح"]]}/></Panel>
+    <Panel title="وزن‌های رتبه‌بندی"><RankingSettings/></Panel>
     <Panel title="تنظیمات پیشنهادها">{policy ? <MutationForm operation="recommendation" returnTo="/admin/settings" label="ذخیره تنظیمات" fields={policyFields.map(([name,label]) => ({name,label,value:String(policy[name] ?? "")}))}/> : <ServiceIssue error={policyError}/>}</Panel></>;
 }
 export async function adminSection(section: string, query: Query) {

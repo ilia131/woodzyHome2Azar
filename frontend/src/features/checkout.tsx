@@ -28,16 +28,17 @@ async function CheckoutDetails() {
       : <p>سبد شما کالای قابل سفارش ندارد.</p>}
   </Panel>;
 }
+const mockCheckout = process.env.WOODZY_TEST_PAYMENTS === "1";
 const validId = (query: Query, field: string) => /^[1-9]\d{0,15}$/.test(first(query[field])) ? first(query[field]) : "";
 async function PaymentSelection({ query }: { query: Query }) {
   const orderId = validId(query, "order");
   if (!orderId) return <Panel title="سفارش برای پرداخت"><LinkButton href="/account/orders">انتخاب از سفارش‌ها</LinkButton></Panel>;
   const order: Row = await authorized("orders/" + orderId + "/");
   return <Panel title={"پرداخت سفارش " + order.order_number}><p>{toman(String(order.total_amount))}</p>
-    {order.status === "pending_payment" ? <MutationForm operation="payment" returnTo={"/checkout/payment?order=" + orderId} label="شروع پرداخت آزمایشی" fields={[
+    {order.status === "pending_payment" && mockCheckout ? <MutationForm operation="payment" returnTo={"/checkout/payment?order=" + orderId} label="شروع پرداخت آزمایشی" fields={[
       { name: "order_id", label: "", type: "hidden", value: orderId }, { name: "idempotency_key", label: "", type: "hidden", value: randomUUID() },
       { name: "provider", label: "درگاه", type: "select", options: [["mock", "درگاه آزمایشی"]], value: "mock" },
-    ]}/> : <p>وضعیت سفارش {value(order, "status")}</p>}</Panel>;
+    ]}/> : <p>{order.status === "pending_payment" ? "درگاه پرداخت در دسترس نیست." : "وضعیت سفارش " + value(order, "status")}</p>}</Panel>;
 }
 async function PaymentResult({ query }: { query: Query }) {
   const id = validId(query, "id");
@@ -45,7 +46,7 @@ async function PaymentResult({ query }: { query: Query }) {
   const payment: Row = await authorized("payments/" + id + "/status/");
   return <Panel title="وضعیت تأییدشده توسط فروشگاه"><DataTable rows={[payment]} columns={paymentColumns}/>
     <Link className="inline-link" href={"/checkout/result?id=" + id}>بررسی دوباره وضعیت</Link>
-    {payment.provider === "mock" && ["pending","created","processing"].includes(String(payment.status)) && <MutationForm operation="simulate" id={id} returnTo={"/checkout/result?id=" + id} label="ارسال سناریوی آزمایشی" fields={[
+    {mockCheckout && payment.provider === "mock" && ["pending","created","processing"].includes(String(payment.status)) && <MutationForm operation="simulate" id={id} returnTo={"/checkout/result?id=" + id} label="ارسال سناریوی آزمایشی" fields={[
       { name: "scenario", label: "سناریوی درگاه آزمایشی", type: "select", options: [["success","موفق"],["failure","ناموفق"],["cancel","لغو"],["timeout","اتمام مهلت"]], value: "success" },
     ]}/>}
   </Panel>;

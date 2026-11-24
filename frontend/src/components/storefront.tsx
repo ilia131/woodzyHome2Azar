@@ -4,7 +4,7 @@ import { HeaderSearch } from "./header-search";
 import { ArrowLeft, ArrowUpLeft, ChevronLeft, Heart, Instagram, Leaf, Menu, PackageCheck, Search, ShieldCheck, ShoppingBag, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { saveFavorite } from "@/app/actions";
-import { demo, number, toman } from "@/lib/catalog";
+import { demo, favoriteIds, number, toman } from "@/lib/catalog";
 import type { Category, Product } from "@/lib/types";
 
 const navigation = [
@@ -53,10 +53,11 @@ export function LinkButton({ href, children, secondary = false }: { href: string
 export function Picture({ src, alt, className = "" }: { src?: string | null; alt: string; className?: string }) {
   return src ? <img className={"picture " + className} src={src} alt={alt} loading="lazy" decoding="async"/> : <div className={"picture absent " + className} role={alt ? "img" : undefined} aria-label={alt || undefined}><Leaf size={30} aria-hidden="true"/></div>;
 }
-export function FavoriteButton({ id, remove = false }: { id: number; remove?: boolean }) {
+export async function FavoriteButton({ id, remove }: { id: number; remove?: boolean }) {
+  const saved = remove ?? (await favoriteIds([id])).has(id);
   return <form action={saveFavorite} className="favorite-control">
-    <input name="product" type="hidden" value={id}/><input name="remove" type="hidden" value={String(remove)}/>
-    <button className="icon-button" aria-label={remove ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}><Heart size={18} fill={remove ? "currentColor" : "none"}/></button>
+    <input name="product" type="hidden" value={id}/><input name="remove" type="hidden" value={String(saved)}/>
+    <button className="icon-button" aria-pressed={saved} aria-label={saved ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}><Heart size={18} fill={saved ? "currentColor" : "none"}/></button>
   </form>;
 }
 export function ProductCard({ product, remove = false }: { product: Product; remove?: boolean }) {
@@ -71,8 +72,9 @@ export function ProductCard({ product, remove = false }: { product: Product; rem
     </div>
   </article>;
 }
-export function ProductGrid({ items }: { items: Product[] }) {
-  return items.length ? <div className="product-grid">{items.map(p => <ProductCard key={p.id} product={p}/>)}</div> : <div className="empty">محصولی برای نمایش پیدا نشد.</div>;
+export async function ProductGrid({ items }: { items: Product[] }) {
+  const saved = await favoriteIds(items.map(p => p.id));
+  return items.length ? <div className="product-grid">{items.map(p => <ProductCard key={p.id} product={p} remove={saved.has(p.id)}/>)}</div> : <div className="empty">محصولی برای نمایش پیدا نشد.</div>;
 }
 export function CategoryGrid({ items }: { items: Category[] }) {
   return items.length ? <div className="category-grid">{items.map(c => <Link prefetch={false} className="category-card" key={c.id} href={"/categories/" + encodeURIComponent(c.slug)}>

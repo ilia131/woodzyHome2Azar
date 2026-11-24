@@ -4,7 +4,7 @@ import { showcaseCategories, showcaseProducts } from "./showcase";
 import type { Category, Listing, Product, Query, Review } from "./types";
 
 const apiBase = process.env.DJANGO_API_URL?.replace(/\/+$/, "");
-export const demo = !apiBase;
+export const demo = !apiBase && process.env.NODE_ENV !== "production" && process.env.WOODZY_SHOWCASE === "1";
 export const first = (value?: string | string[]) => Array.isArray(value) ? value[0] ?? "" : value ?? "";
 export const normalize = (s: string) => s.replace(/ي/g, "ی").replace(/ك/g, "ک").replace(/\u200c/g, " ").replace(/\s+/g, " ").trim().toLocaleLowerCase("fa");
 export const number = new Intl.NumberFormat("fa-IR");
@@ -22,10 +22,44 @@ async function data<T>(path: string, cacheCatalog = false): Promise<T | null> {
   return response.json() as Promise<T>;
 }
 
+async function personalData<T>(path: string): Promise<T | null> {
+  const access = (await cookies()).get("woodzy-access")?.value;
+  if (!access) return data<T>(path);
+  const response = await api(path, { headers: { Authorization: "Bearer " + access } });
+  if (response.status === 401) return data<T>(path);
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error("خطا در دریافت اطلاعات فروشگاه (" + response.status + ")");
+  return response.json();
+}
+
+export async function favoriteIds(ids: number[]) {
+  const jar = await cookies();
+  if (demo) return new Set((jar.get("woodzy-demo-favorites")?.value ?? "").split(",").filter(Boolean).map(Number));
+  const access = jar.get("woodzy-access")?.value;
+  if (!access || !ids.length) return new Set<number>();
+  const response = await api("favorites/status/?" + new URLSearchParams({ ids: ids.join(",") }), {
+    headers: { Authorization: "Bearer " + access },
+  });
+  if (response.status === 401) return new Set<number>();
+  if (!response.ok) throw new Error("دریافت وضعیت علاقه‌مندی‌ها امکان‌پذیر نبود.");
+  const result: { ids: number[] } = await response.json();
+  return new Set(result.ids);
+}
+
+export async function popularSearches() {
+  if (demo) return [];
+  return (await data<Listing<{ term: string; count: number }>>("search/popular/?page_size=8", true))?.results ?? [];
+}
+
 function media(url: string | null) {
   if (!url || !apiBase) return url;
   const resolved = new URL(url, apiBase);
-  return ["http:", "https:"].includes(resolved.protocol) ? resolved.href : null;
+  if (!["http:", "https:"].includes(resolved.protocol)) return null;
+  const browserMedia = process.env.DJANGO_MEDIA_URL?.replace(/\/+$/, "");
+  if (browserMedia && resolved.origin === new URL(apiBase).origin && resolved.pathname.startsWith("/media/")) {
+    return browserMedia + resolved.pathname.slice("/media".length) + resolved.search;
+  }
+  return resolved.href;
 }
 const productMedia = (p: Product): Product => ({
   ...p, main_image: media(p.main_image),
@@ -48,13 +82,26 @@ export const categories = cache(async (): Promise<Category[]> => {
   }
 });
 export const category = cache(async (slug: string) => {
-  const groups = await categories();
-  return groups.find(c => c.slug === slug)
-    ?? (slug === "living" ? groups.find(c => c.slug === process.env.LIVING_CATEGORY_SLUG || c.name === "نشیمن") : undefined);
+  const target = slug === "living" ? process.env.LIVING_CATEGORY_SLUG || slug : slug;
+  if (demo) return showcaseCategories.find(c => c.slug === target);
+  const found = await data<Category>("categories/" + encodeURIComponent(target) + "/", true);
+  if (found) return { ...found, image: media(found.image) };
+  if (slug === "living") return (await categories()).find(c => c.name === "نشیمن");
+
 });
+export async function categoryChildren(slug: string) {
+  const group = await category(slug);
+  if (!group) return [];
+  if (demo) return showcaseCategories.filter(c => c.parent === group.id);
+  return (await data<Listing<Category>>("categories/" + encodeURIComponent(group.slug) + "/children/?page_size=100", true))?.results ?? [];
+}
+export async function suggestedCategories() {
+  if (demo) return showcaseCategories.slice(0, 6);
+  return (await personalData<Listing<Category>>("categories/suggested/?page_size=6"))?.results.map(c => ({ ...c, image: media(c.image) })) ?? [];
+}
 export const product = cache(async (slug: string) => {
   if (demo) return showcaseProducts.find(p => p.slug === slug) ?? null;
-  const found = await data<Product>("products/" + encodeURIComponent(slug) + "/");
+  const found = await personalData<Product>("products/" + encodeURIComponent(slug) + "/");
   return found ? productMedia(found) : null;
 });
 
@@ -79,7 +126,7 @@ export async function products(query: Query = {}, search = false): Promise<Listi
   const empty = paginate([], 1);
   if (search && (phrase.length < 2 || phrase.length > 120 || !/[\p{L}\p{N}]/u.test(phrase))) return empty;
   if (!demo) {
-    const list = await data<Listing<Product>>((search ? "search/products/" : "products/") + "?" + params, !search);
+    const list = await (search ? personalData<Listing<Product>>("search/products/?" + params) : data<Listing<Product>>("products/?" + params, true));
     return list ? { ...list, results: list.results.map(productMedia) } : empty;
   }
   const slug = params.get("category");
@@ -103,7 +150,20 @@ export async function collection(path: string, excludes?: string) {
     const items = showcaseProducts.filter(p => p.slug !== excludes);
     return (path.includes("newest") ? items.reverse() : items).slice(0, 4);
   }
-  return (await data<Listing<Product>>(path, !path.endsWith("/related/")))?.results.map(productMedia).slice(0, 4) ?? [];
+  const listing = path === "products/recommended/" ? await personalData<Listing<Product>>(path)
+    : await data<Listing<Product>>(path, !path.endsWith("/related/"));
+  return listing?.results.map(productMedia).slice(0, 4) ?? [];
+}
+
+export async function recommendationsFromFavorites() {
+  if (demo) return collection("products/recommended/");
+  const access = (await cookies()).get("woodzy-access")?.value;
+  if (!access) return [];
+  const response = await api("recommendations/from-favorites/", { headers: { Authorization: "Bearer " + access } });
+  if (response.status === 401) return [];
+  if (!response.ok) throw new Error("دریافت پیشنهادهای علاقه‌مندی امکان‌پذیر نبود.");
+  const result: Listing<Product> = await response.json();
+  return result.results.map(productMedia).slice(0, 4);
 }
 
 export async function favoriteProducts(page = 1): Promise<{ items: Listing<Product>; authenticated: boolean }> {

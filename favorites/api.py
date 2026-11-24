@@ -38,3 +38,25 @@ class FavoriteDetail(generics.GenericAPIView):
     def delete(self, request, product_id):
         remove_favorite(request.user, product_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavoriteLookupQuery(serializers.Serializer):
+    ids = serializers.RegexField(r'^[1-9][0-9]{0,17}(,[1-9][0-9]{0,17}){0,99}$', max_length=1900)
+
+
+class FavoriteLookupResult(serializers.Serializer):
+    ids = serializers.ListField(child=serializers.IntegerField())
+
+
+class FavoriteLookup(Favorites):
+    pagination_class = None
+
+    @extend_schema(parameters=[FavoriteLookupQuery], responses=FavoriteLookupResult)
+    def get(self, request, *args, **kwargs):
+        query = FavoriteLookupQuery(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        ids = [int(value) for value in query.validated_data['ids'].split(',')]
+        saved = self.get_queryset().filter(pk__in=ids).values_list('pk', flat=True)
+        response = Response({'ids': sorted(saved)})
+        response['Cache-Control'] = 'private, no-store'
+        return response

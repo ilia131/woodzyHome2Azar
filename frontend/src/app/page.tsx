@@ -4,12 +4,12 @@ import type { Query } from "@/lib/types";
 import Image from "next/image";
 import { ArrowLeft, ArrowUpLeft, Armchair, Leaf, PackageCheck, ShieldCheck, Sparkles } from "lucide-react";
 import { Advantages, CategoryGrid, Heading, LinkButton, Picture, ProductGrid } from "@/components/storefront";
-import { categories, collection, first } from "@/lib/catalog";
+import { collection, first, suggestedCategories } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 export default async function Home({ searchParams }: { searchParams: Promise<Query> }) {
   const result = first((await searchParams).store);
-  const [groups, popular, newest] = await Promise.all([categories(), collection("products/popular/"), collection("products/?ordering=-newest")]);
+  const [groups, popular, newest, viewed, discounts, bestSellers] = await Promise.all([suggestedCategories(), collection("products/popular/"), collection("products/?ordering=-newest"), collection("products/most-viewed/"), collection("products/best-discounts/"), collection("products/best-selling/")]);
   return <>
     <section className="hero" aria-labelledby="home-title">
       <div className="container hero-inner">
@@ -28,6 +28,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Que
     <section className="soft"><div className="container home-shelf"><Heading title="محصولات محبوب"><LinkButton href="/products?ordering=-score" secondary>مشاهده همه</LinkButton></Heading><ProductGrid items={popular}/></div></section>
     <section className="container seasonal-section"><div className="seasonal"><Picture src="/images/interior.jpg" alt="چیدمان نشیمن با بافت‌های طبیعی"/><div><h2>چیدمانی برای فصل تازه</h2><LinkButton href="/categories/living">مجموعهٔ نشیمن</LinkButton></div></div></section>
     <section className="container home-shelf"><Heading title="تازه‌های وودزی هوم"><LinkButton href="/products?ordering=-newest" secondary>دیدن تازه‌ها</LinkButton></Heading><ProductGrid items={newest}/></section>
+    {[["پربازدیدترین محصولات", viewed], ["محصولات تخفیف‌دار", discounts], ["پرفروش‌ترین محصولات", bestSellers]].map(([title, items]) =>
+      Array.isArray(items) && items.length > 0 ? <section key={String(title)} className="container home-shelf"><Heading title={String(title)}/><ProductGrid items={items}/></section> : null)}
     <section className="soft"><div className="container home-story split"><Picture src="/images/table.jpg" alt="میز چوبی در یک فضای نشیمن"/><div><span className="eyebrow">داستان وودزی هوم</span><h2>زیبایی در جزئیات پیدا می‌شود</h2><p>بافت، فرم و کاربرد را کنار هم می‌گذاریم تا انتخاب مبلمان برای زندگی روزمره ساده‌تر باشد.</p><LinkButton href="/about" secondary>درباره ما</LinkButton></div></div></section>
     <section id="lookbook" className="container lookbook"><Heading title="گالری چیدمان"/><div className="lookbook-grid">{["room", "chair", "table", "interior", "decor", "vase"].map(img => <Picture key={img} src={"/images/" + img + ".jpg"} alt="نمونه‌ای از مبلمان و دکور خانه"/>)}</div></section>
     <section className="soft"><div className="container home-testimonials"><Heading title="نظر مشتریان"/><div className="empty"><PackageCheck size={23}/> برای دیدن نظرهای تأییدشده، بخش دیدگاه‌های محصول را باز کنید.<Link href="/products" className="inline-link">مشاهده محصولات <ArrowLeft size={16}/></Link></div></div></section>

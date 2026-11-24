@@ -13,9 +13,9 @@ from recommendations.admin_api import AdminRankingWeights, AdminRecommendationPo
 from analytics.admin_api import AdminMostViewedProducts, AdminPopularCategories, AdminPopularProducts, AdminProductMetrics
 from categories.admin_api import AdminCategories
 from categories.api import CategoryChildren, CategoryDetail, CategoryList
-from favorites.api import FavoriteDetail, Favorites
+from favorites.api import FavoriteDetail, FavoriteLookup, Favorites
 from products.admin_api import AdminImages, AdminProductHistory, AdminProducts
-from products.api import BestDiscounts, MostFavorited, MostViewed, ProductDetail, ProductList
+from products.api import BestDiscounts, BestSellers, MostFavorited, MostViewed, ProductDetail, ProductList
 from recommendations.api import FromFavorites, Popular, Recommended, Related, Similar, SuggestedCategories
 from reviews.api import AdminReply, AdminReview, AdminReviews, OwnerReview, ProductReviews
 from seo.admin_api import AdminSEO
@@ -44,6 +44,7 @@ api = [
     path('products/', ProductList.as_view(), name='products'),
     path('products/most-viewed/', MostViewed.as_view(), name='most-viewed'),
     path('products/most-favorited/', MostFavorited.as_view(), name='most-favorited'),
+    path('products/best-selling/', BestSellers.as_view(), name='best-selling'),
     path('products/best-discounts/', BestDiscounts.as_view(), name='best-discounts'),
     path('products/popular/', Popular.as_view(), name='popular-products'),
     path('products/recommended/', Recommended.as_view(), name='recommended-products'),
@@ -58,6 +59,7 @@ api = [
     path('categories/suggested/', SuggestedCategories.as_view(), name='suggested-categories'),
     path('categories/<str:slug>/', CategoryDetail.as_view(), name='category-detail'),
     path('favorites/', Favorites.as_view(), name='favorites'),
+    path("favorites/status/", FavoriteLookup.as_view(), name="favorite-status"),
     path('favorites/<int:product_id>/', FavoriteDetail.as_view(), name='favorite-item'),
     path('admin/products/<int:pk>/views/', AdminProductMetrics.as_view(), name='admin-product-metrics'),
     path('admin/reviews/', AdminReviews.as_view(), name='admin-reviews'),
