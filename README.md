@@ -343,3 +343,5 @@ See [frontend/README.md](frontend/README.md) for local setup and connection to t
 ## Production readiness
 
 See [the production readiness report](docs/WOODZYHOME_PRODUCTION_READINESS.md) for the 27 views, captured layouts and deployment checks. Recovery and newsletter confirmation require a configured SMTP relay and a Celery worker. Set the SMTP variables from `.env.example` before enabling `TRANSACTIONAL_EMAIL_ENABLED`, and verify delivery with the intended sender domain in a controlled environment. Run migrations with the Migration role and provision groups with `manage.py provision_roles`. The contact inbox is available in Django Admin to staff with the contact-message view permission.
+
+The [final API audit](docs/WOODZYHOME_FINAL_API_AUDIT.md) records the 20 follow-up decisions, production API and media configuration, and release validation. Set the server-only `DJANGO_API_URL` in the [Next.js runtime](frontend/README.md) before serving the connected storefront. The backend Compose stack and the Next.js runtime deploy separately.
